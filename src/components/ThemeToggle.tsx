@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Moon, Sun } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const ThemeToggle = () => {
   const [theme, setTheme] = useState('light');
+  const { toast } = useToast();
   
   useEffect(() => {
     // Check for system preference or saved preference
@@ -25,10 +27,21 @@ const ThemeToggle = () => {
     setTheme(newTheme);
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', newTheme);
+    
+    // Show toast notification when theme changes
+    toast({
+      title: `${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)} Mode Activated`,
+      description: `Switched to ${newTheme} theme.`,
+    });
   };
   
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme}>
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={toggleTheme}
+      className="transition-transform hover:scale-110"
+    >
       {theme === 'light' ? (
         <Moon className="h-5 w-5" />
       ) : (

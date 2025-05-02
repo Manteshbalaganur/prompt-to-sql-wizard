@@ -1,9 +1,17 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, Home, FileText, Info, LogIn, User } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from './ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -29,29 +37,49 @@ const Navbar = ({ toggleSidebar }: NavbarProps) => {
         </div>
         
         <div className="hidden md:flex items-center space-x-1">
-          <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-            Home
+          <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            <span>Home</span>
           </Link>
-          <Link to="/docs" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-            Docs
+          <Link to="/docs" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            <span>Docs</span>
           </Link>
-          <Link to="/about" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-            About
+          <Link to="/about" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            <span>About</span>
           </Link>
           <div className="ml-3">
-            <Button variant="outline" size="sm">
-              Sign In
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <LogIn className="h-4 w-4" />
+              <span>Sign In</span>
             </Button>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <div className="md:hidden">
-            <Button variant="outline" size="sm">
-              Sign In
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <User className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>

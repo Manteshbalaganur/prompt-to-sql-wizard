@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import { Textarea } from './ui/textarea';
+import { Loader2 } from 'lucide-react';
 
 interface PromptInputProps {
   onSubmit: (prompt: string) => void;
@@ -40,24 +42,24 @@ const PromptInput = ({ onSubmit, isLoading, suggestions }: PromptInputProps) => 
     <div className="w-full">
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative">
-          <textarea
+          <Textarea
             placeholder={suggestions[activeSuggestion] || "Describe the SQL query you need..."}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            className="w-full min-h-[100px] p-4 border rounded-lg bg-card text-card-foreground resize-none focus:ring-2 focus:ring-primary focus:outline-none"
+            className="w-full min-h-[100px] p-4 border rounded-lg bg-card text-card-foreground resize-y focus:ring-2 focus:ring-primary focus:outline-none transition-all duration-200"
             disabled={isLoading}
           />
           
           <Button 
             type="submit" 
-            className="absolute bottom-4 right-4"
+            className="absolute bottom-4 right-4 transition-all duration-200 hover:scale-105"
             disabled={!prompt.trim() || isLoading}
           >
             {isLoading ? (
               <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin mr-2" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 <span>Generating</span>
               </div>
             ) : (
@@ -67,12 +69,12 @@ const PromptInput = ({ onSubmit, isLoading, suggestions }: PromptInputProps) => 
         </div>
         
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full bg-card border border-border shadow-lg rounded-lg p-2">
+          <div className="absolute z-10 mt-1 w-full bg-card border border-border shadow-lg rounded-lg p-2 animate-fade-in">
             <p className="px-2 py-1 text-sm text-muted-foreground">Suggestions:</p>
             {suggestions.map((suggestion, index) => (
               <div 
                 key={index}
-                className="px-2 py-2 hover:bg-accent rounded cursor-pointer flex items-start"
+                className="px-2 py-2 hover:bg-accent rounded cursor-pointer flex items-start transition-colors duration-200 hover:translate-x-1"
                 onClick={() => handleSuggestionClick(suggestion)}
               >
                 <span className="suggestion-bullet mt-1.5"></span>

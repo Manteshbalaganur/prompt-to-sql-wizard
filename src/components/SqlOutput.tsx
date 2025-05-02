@@ -1,8 +1,14 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Copy, Copy as CopyIcon } from 'lucide-react';
+import { Copy, CheckCheck, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import sql from 'react-syntax-highlighter/dist/esm/languages/hljs/sql';
+import { atomOneDark, atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
+// Register the SQL language
+SyntaxHighlighter.registerLanguage('sql', sql);
 
 interface SqlOutputProps {
   sql: string;
@@ -15,6 +21,26 @@ const SqlOutput = ({ sql, explanation, isLoading }: SqlOutputProps) => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [displayedSql, setDisplayedSql] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  useEffect(() => {
+    // Check theme preference for syntax highlighting
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDarkMode(savedTheme === 'dark' || (!savedTheme && prefersDark));
+    
+    // Add event listener for theme changes
+    const handleThemeChange = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    
+    document.addEventListener('themeChange', handleThemeChange);
+    
+    return () => {
+      document.removeEventListener('themeChange', handleThemeChange);
+    };
+  }, []);
   
   useEffect(() => {
     if (sql && !isLoading) {
@@ -39,40 +65,23 @@ const SqlOutput = ({ sql, explanation, isLoading }: SqlOutputProps) => {
   
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(sql);
+    setCopied(true);
+    
     toast({
       title: "Copied to clipboard",
       description: "SQL query has been copied to your clipboard",
     });
-  };
-  
-  // Function to format SQL with syntax highlighting
-  const formatSql = (sqlText: string) => {
-    if (!sqlText) return null;
     
-    // Replace SQL keywords with styled spans
-    const formattedSql = sqlText
-      .replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|AND|OR|IN|NOT|UNION|ALL|LIMIT|OFFSET|INSERT|UPDATE|DELETE|SET|VALUES|CREATE|TABLE|INDEX|VIEW|PROCEDURE|FUNCTION|TRIGGER|CASE|WHEN|THEN|ELSE|END|IF|IS NULL|IS NOT NULL|LIKE|BETWEEN|EXISTS|DISTINCT|COUNT|SUM|AVG|MIN|MAX|CONCAT|SUBSTR|UPPER|LOWER)\b(?!["])/gi, 
-        match => `<span class="sql-keyword">${match}</span>`)
-      .replace(/('[^']*'|"[^"]*")/g, 
-        match => `<span class="sql-string">${match}</span>`)
-      .replace(/\b(\d+)\b/g,
-        match => `<span class="sql-number">${match}</span>`)
-      .replace(/(--.*)$/gm,
-        match => `<span class="sql-comment">${match}</span>`);
-    
-    return (
-      <pre
-        className="code-block whitespace-pre-wrap"
-        dangerouslySetInnerHTML={{ __html: formattedSql }}
-      />
-    );
+    setTimeout(() => setCopied(false), 2000);
   };
   
   if (isLoading) {
     return (
-      <div className="rounded-lg bg-accent/50 p-8 animate-pulse-light flex items-center justify-center min-h-[250px]">
+      <div className="rounded-lg bg-accent/50 p-8 animate-pulse flex items-center justify-center min-h-[250px]">
         <div className="text-center">
-          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
+          <div className="flex justify-center items-center mb-4">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+          </div>
           <p className="text-lg font-medium">Generating SQL query...</p>
           <p className="text-sm text-muted-foreground mt-2">Converting natural language to SQL</p>
         </div>
@@ -108,7 +117,7 @@ const SqlOutput = ({ sql, explanation, isLoading }: SqlOutputProps) => {
   }
   
   return (
-    <div className="rounded-lg border border-border bg-card">
+    <div className="rounded-lg border border-border bg-card transform transition-all duration-200 hover:shadow-md">
       <div className="flex justify-between items-center p-4 border-b border-border">
         <h3 className="font-medium">Generated SQL</h3>
         <div className="flex items-center gap-2">
@@ -116,6 +125,7 @@ const SqlOutput = ({ sql, explanation, isLoading }: SqlOutputProps) => {
             variant="outline"
             size="sm"
             onClick={() => setShowExplanation(!showExplanation)}
+            className="transition-colors duration-200"
           >
             {showExplanation ? 'Hide' : 'Show'} Explanation
           </Button>
@@ -123,20 +133,36 @@ const SqlOutput = ({ sql, explanation, isLoading }: SqlOutputProps) => {
             variant="outline"
             size="icon"
             onClick={handleCopyToClipboard}
+            className="transition-all duration-200"
           >
-            <CopyIcon className="h-4 w-4" />
+            {copied ? <CheckCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
       </div>
       
       <div className="p-4 relative">
-        <div className={isTyping ? "typing-cursor" : ""}>
-          {formatSql(displayedSql)}
-        </div>
+        <SyntaxHighlighter
+          language="sql"
+          style={isDarkMode ? atomOneDark : atomOneLight}
+          customStyle={{
+            margin: 0,
+            padding: '1rem',
+            borderRadius: '0.375rem',
+            fontSize: '0.9rem',
+            lineHeight: 1.5
+          }}
+          wrapLines={true}
+          wrapLongLines={true}
+        >
+          {displayedSql}
+        </SyntaxHighlighter>
+        {isTyping && (
+          <div className="absolute bottom-4 right-4 h-4 w-1 bg-primary animate-blink"></div>
+        )}
       </div>
       
       {showExplanation && explanation && (
-        <div className="p-4 border-t border-border bg-accent/50">
+        <div className="p-4 border-t border-border bg-accent/50 animate-fade-in">
           <h4 className="font-medium mb-2">Explanation</h4>
           <p className="text-sm">{explanation}</p>
         </div>
