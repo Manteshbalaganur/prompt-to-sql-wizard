@@ -1,16 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Home, FileText, Info, LogIn, User } from 'lucide-react';
+import { Menu, Home, FileText, Info } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { SignInButton, UserButton } from '@clerk/clerk-react';
 
 const Navbar = ({ toggleSidebar }) => {
   return (
@@ -45,36 +38,17 @@ const Navbar = ({ toggleSidebar }) => {
             <span>About</span>
           </Link>
           <div className="ml-3">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <LogIn className="h-4 w-4" />
-              <span>Sign In</span>
-            </Button>
+            <SignInButton mode="modal">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                Sign In
+              </Button>
+            </SignInButton>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full">
-                <User className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <UserButton afterSignOutUrl="/" />
         </div>
       </div>
     </nav>
